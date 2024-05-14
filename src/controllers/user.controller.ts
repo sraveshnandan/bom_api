@@ -1,4 +1,4 @@
-import { JWT_SECRET } from "../config";
+import { JWT_SECRET, SMS_GAITWAY_API_KEY, SMS_GAITWAY_URL } from "../config";
 import express from "express";
 import { User } from "../models";
 import jwt from "jsonwebtoken";
@@ -9,6 +9,7 @@ import { imagekit } from "../lib";
 const SendOtp = async (req: any, res: any) => {
   try {
     const { mobile_no } = req.body;
+    const user = await User.findOne({ phone_no: mobile_no });
     const otp = generateOTP();
     if (!mobile_no) {
       return res.status(500).json({
@@ -16,28 +17,52 @@ const SendOtp = async (req: any, res: any) => {
         message: "Mobile number must be provided.",
       });
     }
-    const user = await User.findOne({ phone_no: mobile_no });
-    if (user) {
-      const newOtp = {
-        expiry: new Date(Date.now() + 10 * 60 * 1000),
-        value: otp,
-      };
-      user.otp = newOtp;
-      await user.save();
-      return res.status(200).json({
+
+    const smsBody = {
+      route: "otp",
+      variables_values: otp,
+      numbers: mobile_no,
+    };
+
+    const resp = await fetch(SMS_GAITWAY_URL!, {
+      headers: {
+        authorization: SMS_GAITWAY_API_KEY!,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(smsBody),
+    });
+
+    const otp_resp = await resp.json();
+    console.log("otp sending responce", otp_resp);
+
+    if (otp_resp.return) {
+      if (user) {
+        const newOtp = {
+          expiry: new Date(Date.now() + 10 * 60 * 1000),
+          value: otp,
+        };
+        user.otp = newOtp;
+        await user.save();
+        return res.status(200).json({
+          success: true,
+          message: `OTP sent successfully to ${mobile_no} .`,
+          otp,
+          account_status: "registred",
+        });
+      }
+      res.status(200).json({
         success: true,
         message: `OTP sent successfully to ${mobile_no} .`,
         otp,
-        account_status: "registred",
+        account_status: "not registred",
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Unable to send otp at this time , please try again later.",
       });
     }
-
-    res.status(200).json({
-      success: true,
-      message: `OTP sent successfully to ${mobile_no} .`,
-      otp,
-      account_status: "not registred",
-    });
   } catch (error: any) {
     res.status(500).json({
       success: false,
@@ -90,9 +115,7 @@ const RegisterUserFunction = async (req: any, res: any) => {
     });
   }
 };
-
 // function to login user
-
 const LoginUserFunction = async (req: any, res: any) => {
   try {
     const { phone_no, otp } = req.body;
@@ -138,9 +161,7 @@ const LoginUserFunction = async (req: any, res: any) => {
     });
   }
 };
-
 //function to fetch user profile
-
 const fetchUserProfileFunction = async (req: any, res: any) => {
   try {
     const profile = res.user;
@@ -156,9 +177,7 @@ const fetchUserProfileFunction = async (req: any, res: any) => {
     });
   }
 };
-
 // function to update user profile
-
 const UpdateUserProfileFunction = async (req: express.Request, res: any) => {
   try {
     const user = await User.findById(res.user._id);
@@ -166,21 +185,27 @@ const UpdateUserProfileFunction = async (req: express.Request, res: any) => {
       ...req.body,
       avatar: user?.avatar,
     };
-    // if user has already avatar then deleting the old one
-    if (user?.avatar.public_id !== "") {
-      const fileId = user?.avatar.public_id;
-      const result = await new Promise((resolve, reject) => {
-        imagekit.deleteFile(fileId!, (err, result) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(result);
-          }
-        });
-      });
-    }
+
     // Uploading file to ImageKit
     if (req.file) {
+      console.log(
+        "file found first of all removing previous one if it is available."
+      );
+      // if user has already avatar then deleting the old one
+      if (user?.avatar.public_id !== "") {
+        const fileId = user?.avatar.public_id;
+        const result = await new Promise((resolve, reject) => {
+          imagekit.deleteFile(fileId!, (err, result) => {
+            if (err) {
+              reject(err);
+              console.log("Previous file deletion error.", err);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+      }
+      console.log("Uploading img....");
       const result: any = await new Promise((resolve, reject) => {
         imagekit.upload(
           {
@@ -201,32 +226,43 @@ const UpdateUserProfileFunction = async (req: express.Request, res: any) => {
           }
         );
       });
+      console.log("Uploading done..");
       // inserting newly uploaded avatar data to the update payload
       dataToUpdate.avatar = {
         public_id: result.fileId,
         url: result.url,
       };
+      const updatedUser = await User.findByIdAndUpdate(
+        { _id: res.user._id },
+        { ...dataToUpdate },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        success: true,
+        updatedProfile: updatedUser,
+        message: "Profile update route fetched.",
+      });
+    } else {
+      const updatedUser = await User.findByIdAndUpdate(
+        { _id: res.user._id },
+        { ...dataToUpdate },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        success: true,
+        updatedProfile: updatedUser,
+        message: "Profile update route fetched.",
+      });
     }
-
-    const updatedUser = await User.findByIdAndUpdate(
-      { _id: res.user._id },
-      { ...dataToUpdate },
-      { new: true }
-    );
-
-    res.status(200).json({
-      success: true,
-      updatedProfile: updatedUser,
-      message: "Profile update route fetched.",
-    });
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error,
     });
   }
 };
-
 export {
   RegisterUserFunction,
   SendOtp,

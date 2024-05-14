@@ -13,10 +13,7 @@ const router = Router();
 router.route("/sendOtp").post(SendOtp);
 router.route("/user/register").post(RegisterUserFunction);
 router.route("/user/login").post(LoginUserFunction);
-router
-  .route("/user/profile")
-  .get(Authorise, CheckAdmin, fetchUserProfileFunction);
-
+router.route("/user/profile").get(Authorise, fetchUserProfileFunction);
 router
   .route("/user/update")
   .post(Authorise, singleUpload, UpdateUserProfileFunction);
