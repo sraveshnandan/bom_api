@@ -4,11 +4,13 @@ import { User } from "../models";
 import jwt from "jsonwebtoken";
 import { generateOTP, generateReferCode } from "../utils";
 import { imagekit } from "../lib";
+import axios from "axios";
 
 // function to send otp
 const SendOtp = async (req: any, res: any) => {
   try {
     const { mobile_no } = req.body;
+    console.log("otp requested from :", req.headers);
     const user = await User.findOne({ phone_no: mobile_no });
     const otp = generateOTP();
     if (!mobile_no) {
@@ -23,20 +25,17 @@ const SendOtp = async (req: any, res: any) => {
       variables_values: otp,
       numbers: mobile_no,
     };
-
-    const resp = await fetch(SMS_GAITWAY_URL!, {
+    const body = JSON.stringify(smsBody);
+    const data = await axios.post(SMS_GAITWAY_URL!, body, {
       headers: {
         authorization: SMS_GAITWAY_API_KEY!,
         "Content-Type": "application/json",
       },
-      method: "POST",
-      body: JSON.stringify(smsBody),
     });
 
-    const otp_resp = await resp.json();
-    console.log("otp sending responce", otp_resp);
+    console.log("otp sending responce", data);
 
-    if (otp_resp.return) {
+    if (data.data.return) {
       if (user) {
         const newOtp = {
           expiry: new Date(Date.now() + 10 * 60 * 1000),
@@ -66,7 +65,7 @@ const SendOtp = async (req: any, res: any) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: error,
     });
   }
 };

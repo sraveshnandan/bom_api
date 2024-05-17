@@ -3,6 +3,9 @@ import express from "express";
 import cors from "cors";
 import { ConnectDb, Mode, Port } from "./config";
 import UserRoutes from "./routes/user.routes";
+import paymentRoutes from "./routes/payment.routes";
+import adminRoutes from "./routes/admin.routes";
+import productRoutes from "./routes/product.routes";
 
 const app = express();
 
@@ -11,14 +14,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: ["http://localhost:8081", "0.0.0.0/0"],
+    origin: ["http://localhost:8081", "http://127.0.0.1:8081", "0.0.0.0/0"],
     credentials: true,
   })
 );
 
 // using endpoints
 
-app.use("/api/v1", UserRoutes);
+app.use("/api/v1", UserRoutes, paymentRoutes, adminRoutes, productRoutes);
 
 const startServer = () => {
   app.listen(Port, () => {
