@@ -11,7 +11,7 @@ export interface IUser extends Document {
   isAdmin: boolean;
   isShopOwner: boolean;
   referCode: string;
-  referCount: [string];
+  referCount?: any[];
   orders: [string];
   cart: [string];
   wishlist: [
@@ -26,7 +26,7 @@ export interface IUser extends Document {
   };
   wallet: {
     currentBallence: number;
-    transations: [string];
+    transations: string[];
   };
   otp?: {
     expiry: Date;

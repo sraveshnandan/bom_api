@@ -94,9 +94,11 @@ const RegisterUserFunction = async (req: any, res: any) => {
     const refrer = await User.findOne({ referCode });
 
     const user = await User.create(data);
+
     if (refrer) {
       refrer.wallet.currentBallence += 10;
-      refrer.referCount.push(user._id);
+      const userId: any = user._id;
+      refrer.referCount!.push(userId);
       await refrer.save();
     }
     const token = jwt.sign({ id: user._id }, JWT_SECRET!, { expiresIn: "30d" });
