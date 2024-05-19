@@ -24,6 +24,7 @@ const SendOtp = async (req: any, res: any) => {
       route: "otp",
       variables_values: otp,
       numbers: mobile_no,
+      flash: "1",
     };
     const body = JSON.stringify(smsBody);
     const data = await axios.post(SMS_GAITWAY_URL!, body, {

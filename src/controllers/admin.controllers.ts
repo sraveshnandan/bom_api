@@ -60,7 +60,7 @@ const createCategoryFunction = async (req: express.Request, res: any) => {
 
 const GetCategory = async (req: express.Request, res: any) => {
   try {
-    const { limit } = req.headers;
+    const { limit } = req.query;
     const categories = await Category.find({})
       .sort({ createdAt: -1 })
       .limit(Number(limit))
@@ -232,7 +232,7 @@ const createBannerFunction = async (req: express.Request, res: any) => {
 };
 const GetBanners = async (req: express.Request, res: any) => {
   try {
-    const { limit } = req.headers;
+    const { limit } = req.query;
     const Banners = await Banner.find({})
       .sort({ createdAt: -1 })
       .limit(Number(limit))
