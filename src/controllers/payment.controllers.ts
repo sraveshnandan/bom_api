@@ -1,6 +1,7 @@
 import express from "express";
 import { razorpay } from "../lib";
 import { RAZORPAY_PAYMENY_VERIFY_SIGNATURE } from "../config";
+import { Tansaction, User } from "../models";
 const BuySubscriptionFunction = async (req: express.Request, res: any) => {
   try {
     const { amount, userId } = req.body;
@@ -37,32 +38,11 @@ const BuySubscriptionFunction = async (req: express.Request, res: any) => {
 const VerifyPaymentFunction = async (req: express.Request, res: any) => {
   try {
     // do a validation
+    console.log("verify api hitted");
     const secret = RAZORPAY_PAYMENY_VERIFY_SIGNATURE;
     console.log("Requested body", req.body);
-    const crypto = require("crypto");
-    const shasum = crypto.createHmac("sha256", secret);
-    shasum.update(JSON.stringify(req.body));
-    const digest = shasum.digest("hex");
-    console.log(
-      "digest",
-      digest,
-      "header data",
-      req.headers["x-razorpay-signature"]
-    );
-    if (digest === req.headers["x-razorpay-signature"]) {
-      console.log("request is legit");
-      // process it
-      return res.status(200).json({
-        success: true,
-        message: "Payment confirmed by server.",
-      });
-    } else {
-      // pass it
-      return res.status(400).json({
-        success: false,
-        message: "Payment not  confirmed by server yet.",
-      });
-    }
+    console.log("Request headers", req.headers);
+    res.status(200).json({ success: true });
   } catch (error) {
     res.status(500).json({
       success: false,

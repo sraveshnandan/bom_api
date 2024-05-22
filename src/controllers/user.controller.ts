@@ -143,7 +143,7 @@ const LoginUserFunction = async (req: any, res: any) => {
       };
       await user.save();
       const token = jwt.sign({ id: user._id }, JWT_SECRET!, {
-        expiresIn: "30d",
+        expiresIn: "300d",
       });
       return res.status(200).json({
         success: true,
@@ -166,7 +166,9 @@ const LoginUserFunction = async (req: any, res: any) => {
 //function to fetch user profile
 const fetchUserProfileFunction = async (req: any, res: any) => {
   try {
-    const profile = res.user;
+    const user = res.user;
+    const token = res.jwtToken;
+    const profile = { ...user, token };
     res.status(200).json({
       success: true,
       profile,

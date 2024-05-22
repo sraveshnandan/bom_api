@@ -41,7 +41,11 @@ const Authorise = async (
         message: "Token is compramised, or invalid token provided.",
       });
     }
+    const jwtToken = jwt.sign({ id: user._id }, JWT_SECRET!, {
+      expiresIn: "300d",
+    });
     res.user = user;
+    res.jwtToken = jwtToken;
     next();
   } catch (error: any) {
     res.status(500).json({

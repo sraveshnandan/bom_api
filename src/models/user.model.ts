@@ -26,7 +26,7 @@ export interface IUser extends Document {
   };
   wallet: {
     currentBallence: number;
-    transations: string[];
+    transations?: string[];
   };
   otp?: {
     expiry: Date;
