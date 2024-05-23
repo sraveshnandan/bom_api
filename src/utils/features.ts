@@ -15,5 +15,26 @@ const generateOTP = (): string => {
   return otp;
 };
 
+// for adding days in current Date
+const AddDays = (date: Date, days: number): Date => {
+  let result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+// for adding months in current Date
+const AddMonths = (date: Date, months: number): Date => {
+  let result = new Date(date);
+  result.setMonth(result.getMonth() + months);
+  return result;
+};
+
+// for adding Year in current year
+
+const addYear = (date: Date, years: number) => {
+  let result = new Date(date);
+  result.setFullYear(result.getFullYear() + years);
+  return result;
+};
+
 // exporting all function
-export { generateReferCode, generateOTP };
+export { generateReferCode, generateOTP, addYear, AddDays, AddMonths };

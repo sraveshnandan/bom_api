@@ -1,6 +1,5 @@
 import express from "express";
 import { razorpay } from "../lib";
-import { RAZORPAY_PAYMENY_VERIFY_SIGNATURE } from "../config";
 import { Tansaction, User } from "../models";
 const BuySubscriptionFunction = async (req: express.Request, res: any) => {
   try {
@@ -37,18 +36,84 @@ const BuySubscriptionFunction = async (req: express.Request, res: any) => {
 
 const VerifyPaymentFunction = async (req: express.Request, res: any) => {
   try {
-    // do a validation
-    console.log("verify api hitted");
-    const secret = RAZORPAY_PAYMENY_VERIFY_SIGNATURE;
-    console.log("Requested body", req.body);
-    console.log("Request headers", req.headers);
-    res.status(200).json({ success: true });
-  } catch (error) {
+    const { razorpay_payment_id, razorpay_order_id, razorpay_signature } =
+      req.body;
+    const userId = res.user._id;
+
+    const user = await User.findById(userId);
+    const amount: any = (await razorpay.orders.fetch(razorpay_order_id)).amount;
+    const paymentDetails = await razorpay.payments.fetch(razorpay_payment_id);
+
+    if (paymentDetails.captured) {
+      const today = new Date();
+      let expiry = new Date();
+      if (amount === 100) {
+        expiry.setDate(today.getDate() + 7);
+      }
+      if (amount === 14900) {
+        expiry.setMonth(today.getMonth() + 1);
+      }
+      if (amount === 99900) {
+        expiry.setFullYear(today.getFullYear() + 1);
+      }
+      const transaction = await Tansaction.create({
+        payment_id: razorpay_payment_id,
+        amount: Number(amount) / 100,
+        payer: user?._id,
+        other: {
+          razorpay_signature,
+          paymentDetails,
+          expiry,
+        },
+      });
+      user?.wallet.transations?.push(transaction._id as any);
+      await user?.save();
+      return res.status(200).json({
+        success: true,
+        message: "Payment successfull.",
+      });
+    } else {
+      return res.status(409).json({
+        success: false,
+        message: "Payment is not confermed by the server.",
+      });
+    }
+  } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error,
+      message: error.message,
     });
   }
 };
 
-export { BuySubscriptionFunction, VerifyPaymentFunction };
+const CheckSubcription = async (req: express.Request, res: any) => {
+  try {
+    const userId = res.user._id;
+    const transaction: any = await Tansaction.findOne({ payer: userId });
+    if (!transaction) {
+      return res.status(409).json({
+        success: false,
+        message: "No any subscription found",
+      });
+    }
+    const isExpired = transaction?.other?.expiry < new Date();
+    if (isExpired) {
+      return res.status(400).json({
+        success: false,
+        message: "Your subscription is expired.",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      transaction,
+      message: "Successfully fetched Subscription Details.",
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export { BuySubscriptionFunction, VerifyPaymentFunction, CheckSubcription };
