@@ -103,9 +103,13 @@ const CheckSubcription = async (req: express.Request, res: any) => {
         message: "Your subscription is expired.",
       });
     }
+    const daysRemaining =
+      transaction.other.expiry.getDate() - new Date().getDate();
+    const status = `${daysRemaining} days left `;
     res.status(200).json({
       success: true,
       transaction,
+      status,
       message: "Successfully fetched Subscription Details.",
     });
   } catch (error: any) {

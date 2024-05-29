@@ -49,16 +49,19 @@ const ProductSchema = new Schema<IProduct>(
         url: String,
       },
     ],
-    categories: {
-      type: Schema.Types.ObjectId,
-      ref: "Category",
-    },
+    categories: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Category",
+      },
+    ],
     property: [
       {
         name: String,
         value: String,
       },
     ],
+
     quantity: {
       type: Number,
       default: 10,

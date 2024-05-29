@@ -1,10 +1,9 @@
-import { JWT_SECRET, SMS_GAITWAY_API_KEY, SMS_GAITWAY_URL } from "../config";
+import { JWT_SECRET, SMS_GAITWAY_URL } from "../config";
 import express from "express";
 import { User } from "../models";
 import jwt from "jsonwebtoken";
 import { generateOTP, generateReferCode } from "../utils";
 import { imagekit } from "../lib";
-import axios from "axios";
 
 // function to send otp
 const SendOtp = async (req: any, res: any) => {
@@ -26,17 +25,19 @@ const SendOtp = async (req: any, res: any) => {
       numbers: mobile_no,
       flash: "1",
     };
-    const body = JSON.stringify(smsBody);
-    const data = await axios.post(SMS_GAITWAY_URL!, body, {
+    const resp = await fetch(SMS_GAITWAY_URL!, {
       headers: {
-        authorization: SMS_GAITWAY_API_KEY!,
         "Content-Type": "application/json",
+        authorization:
+          "iw5Y3hplQroMGgz0uPK7k26xbaFnjDfWtR4OqcABITLUmeHCXNZ3Wy471fwPLeRgHOpbvUk6l5AxGEru",
       },
+      method: "POST",
+      body: JSON.stringify(smsBody),
     });
+    const data = await resp.json();
+    console.log(data);
 
-    console.log("otp sending responce", data);
-
-    if (data.data.return) {
+    if (data.return) {
       if (user) {
         const newOtp = {
           expiry: new Date(Date.now() + 10 * 60 * 1000),
@@ -66,7 +67,7 @@ const SendOtp = async (req: any, res: any) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error,
+      message: error.message,
     });
   }
 };
@@ -166,12 +167,12 @@ const LoginUserFunction = async (req: any, res: any) => {
 //function to fetch user profile
 const fetchUserProfileFunction = async (req: any, res: any) => {
   try {
-    const user = res.user;
     const token = res.jwtToken;
-    const profile = { ...user, token };
+    const profile = res.user;
     res.status(200).json({
       success: true,
       profile,
+      token,
       message: "Profile fetched successfully.",
     });
   } catch (error: any) {
@@ -192,23 +193,20 @@ const UpdateUserProfileFunction = async (req: express.Request, res: any) => {
 
     // Uploading file to ImageKit
     if (req.file) {
-      console.log(
-        "file found first of all removing previous one if it is available."
-      );
       // if user has already avatar then deleting the old one
-      if (user?.avatar.public_id !== "") {
-        const fileId = user?.avatar.public_id;
-        const result = await new Promise((resolve, reject) => {
-          imagekit.deleteFile(fileId!, (err, result) => {
-            if (err) {
-              reject(err);
-              console.log("Previous file deletion error.", err);
-            } else {
-              resolve(result);
-            }
-          });
-        });
-      }
+      // if (user?.avatar.public_id !== "") {
+      //   const fileId = user?.avatar.public_id;
+      //   const result = await new Promise((resolve, reject) => {
+      //     imagekit.deleteFile(fileId!, (err, result) => {
+      //       if (err) {
+      //         reject(err);
+      //         console.log("Previous file deletion error.", err);
+      //       } else {
+      //         resolve(result);
+      //       }
+      //     });
+      //   });
+      // }
       console.log("Uploading img....");
       const result: any = await new Promise((resolve, reject) => {
         imagekit.upload(

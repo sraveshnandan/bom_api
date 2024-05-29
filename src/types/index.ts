@@ -4,3 +4,8 @@ export interface IDecodedToken {
   iat: number;
   exp: number;
 }
+
+export interface UploadResult {
+  public_id: string;
+  url: string;
+}

@@ -1,3 +1,6 @@
+import { imagekit } from "../lib";
+import { UploadResult } from "../types";
+
 // for generating unique refer code
 const generateReferCode = (): string => {
   const prefix: string = "BOM";
@@ -36,5 +39,36 @@ const addYear = (date: Date, years: number) => {
   return result;
 };
 
+// Function to upload a file buffer to ImageKit
+const uploadToImageKit = (file: Express.Multer.File): Promise<UploadResult> => {
+  return new Promise((resolve, reject) => {
+    imagekit.upload(
+      {
+        file: file.buffer, // the file buffer
+        fileName: file.originalname, // original file name
+        folder: "/products", // optional: folder to store the files in
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        }
+
+        if (result) {
+          resolve({
+            public_id: result.fileId,
+            url: result.url,
+          });
+        }
+      }
+    );
+  });
+};
 // exporting all function
-export { generateReferCode, generateOTP, addYear, AddDays, AddMonths };
+export {
+  generateReferCode,
+  generateOTP,
+  addYear,
+  AddDays,
+  AddMonths,
+  uploadToImageKit,
+};

@@ -1,0 +1,20 @@
+{
+  "products": [
+    {
+      "quantity": 2,
+      "product": "6656bca9b4103db332b7f3e3"
+    }
+  ],
+  "totalPrice": 1998,
+  "address": {
+    "appartment_building_no": 78,
+    "village_locality": "Muraura Dih",
+    "landmark": "Bihar sahrif railway Station",
+    "city": "Bihar sharif",
+    "district": "Nalanda",
+    "state": "Bihar",
+    "pin_code": 803101,
+    "contact_no": 9470830399
+  },
+  "shop": "664ffba7e7b91028d07076e2"
+}

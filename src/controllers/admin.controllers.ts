@@ -95,18 +95,18 @@ const UpdateCategoryFunction = async (req: express.Request, res: any) => {
     };
 
     if (req.file) {
-      // deleting previous image
-      const fileId = category.image.public_id;
-      const deleteRequest = await new Promise((resolve, reject) => {
-        imagekit.deleteFile(fileId!, (err, result) => {
-          if (err) {
-            reject(err);
-            console.log("Previous file deletion error.", err);
-          } else {
-            resolve(result);
-          }
-        });
-      });
+      // // deleting previous image
+      // const fileId = category.image.public_id;
+      // const deleteRequest = await new Promise((resolve, reject) => {
+      //   imagekit.deleteFile(fileId!, (err, result) => {
+      //     if (err) {
+      //       reject(err);
+      //       console.log("Previous file deletion error.", err);
+      //     } else {
+      //       resolve(result);
+      //     }
+      //   });
+      // });
       //uploading new one
       console.log("Uploading img....");
       const result: any = await new Promise((resolve, reject) => {
@@ -268,17 +268,17 @@ const UpdateBannerFunction = async (req: express.Request, res: any) => {
 
     if (req.file) {
       // deleting previous image
-      const fileId = banner.image.public_id;
-      const deleteRequest = await new Promise((resolve, reject) => {
-        imagekit.deleteFile(fileId!, (err, result) => {
-          if (err) {
-            reject(err);
-            console.log("Previous file deletion error.", err);
-          } else {
-            resolve(result);
-          }
-        });
-      });
+      // const fileId = banner.image.public_id;
+      // const deleteRequest = await new Promise((resolve, reject) => {
+      //   imagekit.deleteFile(fileId!, (err, result) => {
+      //     if (err) {
+      //       reject(err);
+      //       console.log("Previous file deletion error.", err);
+      //     } else {
+      //       resolve(result);
+      //     }
+      //   });
+      // });
       //uploading new one
       console.log("Uploading img....");
       const result: any = await new Promise((resolve, reject) => {
