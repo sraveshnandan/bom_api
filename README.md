@@ -1,101 +1,71 @@
-import React, {useRef} from 'react';
-import {Animated, ScrollView, StyleSheet, Text, View} from 'react-native';
+Marketplace App Backend API
+This API provides backend services for managing a marketplace application, including user management, shop management, order management, product management, banner management, category management, and payment management.
 
-const DATA = [
-{id: 1},
-{id: 2},
-{id: 3},
-{id: 4},
-{id: 5},
-{id: 6},
-{id: 7},
-{id: 8},
-{id: 9},
-{id: 10},
-];
+Table of Contents
+Getting Started
+Prerequisites
+Installation
+Configuration
+API Endpoints
+User Management
+Shop Management
+Order Management
+Product Management
+Banner Management
+Category Management
+Payment Management
+Contributing
+License
+Getting Started
+Prerequisites
+Ensure you have the following installed on your system:
 
-const Header_Max_Height = 240;
-const Header_Min_Height = 120;
-const Scroll_Distance = Header_Max_Height - Header_Min_Height;
+Node.js
+npm or yarn
+MongoDB
+Installation
+Clone the repository:
 
-const DynamicHeader = ({value}: any) => {
-const animatedHeaderHeight = value.interpolate({
-inputRange: [0, Scroll_Distance],
-outputRange: [Header_Max_Height, Header_Min_Height],
-extrapolate: 'clamp',
-});
+sh
+Copy code
+git clone https://github.com/yourusername/marketplace-backend.git
+cd marketplace-backend
+Install dependencies:
 
-const animatedHeaderColor = value.interpolate({
-inputRange: [0, Scroll_Distance],
-outputRange: ['#181D31', '#678983'],
-extrapolate: 'clamp',
-});
+sh
+Copy code
+npm install
+# or
+yarn install
+Set up environment variables:
+Create a .env file in the root directory and add your configuration values (see Configuration for details).
 
-return (
-<Animated.View
-style={[
-styles.header,
-{
-height: animatedHeaderHeight,
-backgroundColor: animatedHeaderColor,
-},
-]}>
-<Text style={styles.title}>Header Content</Text>
-</Animated.View>
-);
-};
+Start the development server:
 
-const ScrollViewScreen = () => {
-const scrollOffsetY = useRef(new Animated.Value(0)).current;
-return (
-<View>
-<DynamicHeader value={scrollOffsetY} />
-<ScrollView
-scrollEventThrottle={5}
-showsVerticalScrollIndicator={false}
-onScroll={Animated.event(
-[{nativeEvent: {contentOffset: {y: scrollOffsetY}}}],
-{
-useNativeDriver: false,
-},
-)}>
-{DATA.map(val => {
-return (
-<View style={styles.card}>
-<Text style={styles.subtitle}>({val.id})</Text>
-</View>
-);
-})}
-</ScrollView>
-</View>
-);
-};
+sh
+Copy code
+npm run dev
+# or
+yarn dev
+Configuration
+Create a .env file in the root directory with the following variables:
 
-export default ScrollViewScreen;
+env
+Copy code
+# Server configuration
+PORT=3000
 
-const styles = StyleSheet.create({
-header: {
-justifyContent: 'center',
-alignItems: 'center',
-left: 0,
-right: 0,
-paddingTop: 25,
-},
-title: {
-color: '#ffff',
-fontWeight: 'bold',
-fontSize: 20,
-},
-card: {
-height: 100,
-backgroundColor: '#E6DDC4',
-marginTop: 10,
-justifyContent: 'center',
-alignItems: 'center',
-marginHorizontal: 10,
-},
-subtitle: {
-color: '#181D31',
-fontWeight: 'bold',
-},
-});
+# Database configuration
+MONGO_URI=mongodb://localhost:27017/yourdbname
+
+# Authentication configuration
+JWT_SECRET=your_jwt_secret
+
+# ImageKit configuration
+IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
+IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
+IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_imagekit_id
+
+# Payment gateway configuration
+PAYMENT_GATEWAY_API_KEY=your_payment_gateway_api_key
+API Endpoints
