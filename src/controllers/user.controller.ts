@@ -186,10 +186,15 @@ const fetchUserProfileFunction = async (req: any, res: any) => {
 const UpdateUserProfileFunction = async (req: express.Request, res: any) => {
   try {
     const user = await User.findById(res.user._id);
+    const { addres } = req.body;
     const dataToUpdate = {
       ...req.body,
       avatar: user?.avatar,
+      address: user?.address,
     };
+    if (addres) {
+      dataToUpdate.address = JSON.parse(addres);
+    }
 
     // Uploading file to ImageKit
     if (req.file) {
